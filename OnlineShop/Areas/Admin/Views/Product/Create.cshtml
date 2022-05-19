@@ -60,14 +60,12 @@
             </div>
             <span asp-validation-for="ProductTypeId" class="text-danger"></span>
         </div>
-        @*special tag id*@
         <div class="form-group row">
             <div class="col-2">
                 <label asp-for="SpecialTagId"></label>
             </div>
             <div class = "col-5">
                 <select asp-for="SpecialTagId" asp-items="ViewBag.TagId" class="form-control"></select>
-                @*<input asp-for="SpecialTagId" class="form-control"/>*@
             </div>
             <span asp-validation-for="SpecialTagId" class="text-danger"></span>
         </div>
