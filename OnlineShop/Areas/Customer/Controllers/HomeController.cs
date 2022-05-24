@@ -25,7 +25,7 @@ namespace OnlineShop.Controllers
 
         public IActionResult Index(int? page)
         {
-            return View(_db.Products.Include(c=>c.ProductTypes).Include(c=>c.SpecialTag).ToList().ToPagedList(pageNumber:page??1, pageSize:6));
+            return View(_db.Products.Include(c=>c.ProductTypes).Include(c=>c.SpecialTag).ToList().ToPagedList(pageNumber:page??1, pageSize:9));
         }
 
         public IActionResult Privacy()
