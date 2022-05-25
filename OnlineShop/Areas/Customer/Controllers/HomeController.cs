@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OnlineShop.Data;
 using OnlineShop.Models;
+using OnlineShop.Models.ViewModels;
 using OnlineShop.Utility;
 using System;
 using System.Collections.Generic;
@@ -46,38 +47,42 @@ namespace OnlineShop.Controllers
             {
                 return NotFound();
             }
-            var product = _db.Products.Include(c => c.ProductTypes).FirstOrDefault(c => c.Id == id);
-            if (product == null)
+            var productInBase = _db.Products.Include(c => c.ProductTypes).FirstOrDefault(c => c.Id == id);
+            if (productInBase == null)
             {
                 return NotFound();
             }
-            return View(product);
+            ProductsCount productsCount = new ProductsCount() {Product=productInBase, Count=0};
+            return View(productsCount);
         }
 
         //Post product details method
         [HttpPost]
         [ActionName("Details")]
-        public ActionResult ProductDetails(int? id)
+        public ActionResult ProductDetails(ProductsCount productsCount)
         {
             List<Products> products = new List<Products>();
-            if (id == null)
-            {
-                return NotFound();
-            }
-            var product = _db.Products.Include(c => c.ProductTypes).FirstOrDefault(c => c.Id == id);
+            var product = _db.Products.Include(c => c.ProductTypes).FirstOrDefault(c => c.Id == productsCount.Product.Id);
             if (product == null)
             {
                 return NotFound();
+            }
+            if (!product.IsAvailable)
+            {
+                ViewBag.message = "This product is not available!";
+                return View(new ProductsCount() { Product = product, Count = productsCount.Count});
             }
             products = HttpContext.Session.Get<List<Products>>("products");
             if (products==null)
             {
                 products = new List<Products>();
             }
-
-            products.Add(product);
+            for(int i=0; i< productsCount.Count; i++)
+            {
+                products.Add(product);
+            }
             HttpContext.Session.Set("products", products);
-            return View(product);
+            return RedirectToAction(nameof(Index));
         }
 
         // Get Remove method
@@ -95,7 +100,7 @@ namespace OnlineShop.Controllers
 
                 }
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Cart));
         }
 
 
@@ -114,6 +119,19 @@ namespace OnlineShop.Controllers
                 }
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public IActionResult RemoveAll()
+        {
+            List<Products> products = HttpContext.Session.Get<List<Products>>("products");
+            if (products != null)
+            {
+                //products.Remove(product);
+                products = new List<Products>();
+                HttpContext.Session.Set("products", products);
+            }
+            return RedirectToAction(nameof(Cart));
         }
 
         //GET product Cart Action method
